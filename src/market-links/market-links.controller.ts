@@ -7,30 +7,35 @@ import {
   Put,
   Param,
   Delete,
+  Inject,
 } from '@nestjs/common';
 
 import { MarketLinksService } from './market-links.service';
 import { CreateMarketLinkDto } from './dto/create-market-link.dto';
 import { GetMarketLinkDto } from './dto/get-market-link.dto';
 import { UpdateMarketLinkDto } from './dto/update-market-link.dto';
+import { MarketLink } from './entities/market-link.entity';
+import { MarketLinkRepositoryType } from './market-links.provider';
 
 @Controller('market-links')
 export class MarketLinksController {
-  constructor(private readonly marketLinksService: MarketLinksService) {}
+  constructor(
+    private readonly marketLinksService: MarketLinksService,
+
+    @Inject(MarketLinkRepositoryType)
+    private marketLinkRepository: typeof MarketLink,
+  ) {}
 
   @Post()
   create(@Body() createMarketLinkDto: CreateMarketLinkDto) {
-    return `This action adds a new cat: ${JSON.stringify(createMarketLinkDto)}`;
+    return this.marketLinkRepository.create({
+      ...createMarketLinkDto,
+    });
   }
 
   @Get()
-  findAll(): GetMarketLinkDto[] {
-    return [
-      {
-        id: 1,
-        url: 'https://www.google.com',
-      },
-    ];
+  async findAll(): Promise<GetMarketLinkDto[]> {
+    return (await this.marketLinkRepository.findAll()) as GetMarketLinkDto[];
   }
 
   @Get(':id')
