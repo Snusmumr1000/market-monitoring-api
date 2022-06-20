@@ -99,7 +99,14 @@ export class MarketLinksService {
   private async appendScreenshotCronJob(screenshotCronJob: ScreenshotCronJob) {
     // TODO: move to CronService
     const job = new CronJob(screenshotCronJob.schedule, () => {
-      this.takeScreenshotAndSave(screenshotCronJob.marketLinkId);
+      try {
+        this.takeScreenshotAndSave(screenshotCronJob.marketLinkId);
+      } catch (e) {
+        // probably if market link record was deleted
+        // in the same time while writing screenshot to database
+        console.log('Some error occurred while taking screenshot');
+        console.log(e);
+      }
     });
 
     this.schedulerRegistry.addCronJob(`${screenshotCronJob.id}`, job);
