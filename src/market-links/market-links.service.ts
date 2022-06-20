@@ -39,9 +39,9 @@ export class MarketLinksService {
     const screenshotCronJob = await this.screenshotCronJobRepository.create(
       cronJob,
     );
-    await this.appendScreenshotCronJob(screenshotCronJob);
 
-    await this.takeScreenshotAndSave(marketLink.id);
+    this.appendScreenshotCronJob(screenshotCronJob);
+    this.takeScreenshotAndSave(marketLink.id);
 
     return marketLink;
   }
@@ -80,7 +80,7 @@ export class MarketLinksService {
     job.start();
   }
 
-  private async removeScreenshotCronJob(screenshotCronJobId: number) {
+  private removeScreenshotCronJob(screenshotCronJobId: number) {
     this.schedulerRegistry.deleteCronJob(`${screenshotCronJobId}`);
   }
 
