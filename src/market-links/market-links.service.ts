@@ -25,9 +25,7 @@ export class MarketLinksService {
 
   async __init() {
     const cronJobs = await this.screenshotCronJobRepository.findAll();
-    cronJobs.forEach((cronJob) => {
-      this.__appendScreenshotCronJob(cronJob);
-    });
+    cronJobs.forEach(this.__appendScreenshotCronJob);
   }
 
   async createMarketLink(
