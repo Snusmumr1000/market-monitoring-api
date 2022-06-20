@@ -16,7 +16,7 @@ export const databaseProviders = [
         database: process.env.DB_NAME,
       });
       sequelize.addModels([MarketLink, Screenshot, ScreenshotCronJob]);
-      await sequelize.sync({ force: true });
+      await sequelize.sync();
       return sequelize;
     },
   },
