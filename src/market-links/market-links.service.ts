@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpException, Inject, Injectable } from '@nestjs/common';
 import { MarketLink } from './entities/market-link.entity';
 import { MarketLinkRepositoryType } from './market-links.provider';
 import { CreateMarketLinkDto } from './dto/create-market-link.dto';
@@ -9,6 +9,8 @@ import { ScreenshotCronJob } from '../screenshot-cron-jobs/entities/screenshot-c
 import { CronExpression, SchedulerRegistry } from '@nestjs/schedule';
 import { CronJob } from 'cron';
 import puppeteer from 'puppeteer';
+import axios from 'axios';
+import { ErrorMessages } from '../resources/error-messages';
 
 @Injectable()
 export class MarketLinksService {
@@ -27,23 +29,46 @@ export class MarketLinksService {
   async createMarketLink(
     marketLinkDto: CreateMarketLinkDto,
   ): Promise<MarketLink> {
+    // TODO: separate layer for validation
+    if (!MarketLinksService.validateUrl(marketLinkDto.url)) {
+      throw new HttpException(ErrorMessages.InvalidUrl, 400);
+    }
+    if (!(await MarketLinksService.checkIfWebPageExists(marketLinkDto.url))) {
+      throw new HttpException(ErrorMessages.PageDoesNotExist, 400);
+    }
+
     // TODO: use transaction
     const marketLink = await this.marketLinkRepository.create({
       ...marketLinkDto,
     });
 
     const cronJob = {
-      schedule: CronExpression.EVERY_10_SECONDS,
+      schedule: CronExpression.EVERY_DAY_AT_2AM,
       marketLinkId: marketLink.id,
     };
     const screenshotCronJob = await this.screenshotCronJobRepository.create(
       cronJob,
     );
-
     this.appendScreenshotCronJob(screenshotCronJob);
+
     this.takeScreenshotAndSave(marketLink.id);
 
     return marketLink;
+  }
+
+  private static validateUrl(url: string) {
+    const urlRegex =
+      /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/;
+    return urlRegex.test(url);
+  }
+
+  private static async checkIfWebPageExists(url: string) {
+    try {
+      const { status } = await axios.get(url);
+      return status >= 200 && status < 400;
+    } catch (e) {
+      return false;
+    }
   }
 
   async deleteMarketLink(marketLinkId: number) {
