@@ -5,7 +5,7 @@ import {
   BelongsTo,
   ForeignKey,
 } from 'sequelize-typescript';
-import { MarketLink } from './market-link.entity';
+import { MarketLink } from '../../market-links/entities/market-link.entity';
 
 @Table
 export class Screenshot extends Model {

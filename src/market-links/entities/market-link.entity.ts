@@ -1,6 +1,6 @@
 import { Table, Column, Model, HasMany } from 'sequelize-typescript';
-import { Screenshot } from './screenshot.entity';
-import { ScreenshotCronJob } from './screenshot-cron-job.entity';
+import { Screenshot } from '../../screenshots/entities/screenshot.entity';
+import { ScreenshotCronJob } from '../../screenshot-cron-jobs/entities/screenshot-cron-job.entity';
 
 @Table
 export class MarketLink extends Model {

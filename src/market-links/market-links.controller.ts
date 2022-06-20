@@ -34,9 +34,7 @@ export class MarketLinksController {
     type: GetMarketLinkDto,
   })
   async create(@Body() createMarketLinkDto: CreateMarketLinkDto) {
-    return this.marketLinkRepository.create({
-      ...createMarketLinkDto,
-    });
+    return this.marketLinksService.createMarketLink(createMarketLinkDto);
   }
 
   @Get()

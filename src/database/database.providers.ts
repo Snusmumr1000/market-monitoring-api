@@ -1,7 +1,7 @@
 import { Sequelize } from 'sequelize-typescript';
 import { MarketLink } from '../market-links/entities/market-link.entity';
-import { Screenshot } from '../market-links/entities/screenshot.entity';
-import { ScreenshotCronJob } from '../market-links/entities/screenshot-cron-job.entity';
+import { Screenshot } from '../screenshots/entities/screenshot.entity';
+import { ScreenshotCronJob } from '../screenshot-cron-jobs/entities/screenshot-cron-job.entity';
 
 export const databaseProviders = [
   {
