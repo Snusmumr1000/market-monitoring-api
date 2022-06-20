@@ -1,14 +1,13 @@
 import {
-  Controller,
-  Get,
-  Query,
-  Post,
   Body,
-  Put,
-  Param,
+  Controller,
   Delete,
-  Inject,
+  Get,
   HttpStatus,
+  Inject,
+  Param,
+  Post,
+  Put,
 } from '@nestjs/common';
 
 import { MarketLinksService } from './market-links.service';
@@ -18,6 +17,9 @@ import { UpdateMarketLinkDto } from './dto/update-market-link.dto';
 import { MarketLink } from './entities/market-link.entity';
 import { MarketLinkRepositoryType } from './market-links.provider';
 import { ApiResponse } from '@nestjs/swagger';
+import { ScreenshotRepositoryType } from '../screenshots/screenshots.provider';
+import { Screenshot } from '../screenshots/entities/screenshot.entity';
+import { GetScreenshotDto } from '../screenshots/dto/get-screenshot.dto';
 
 @Controller('market-links')
 export class MarketLinksController {
@@ -26,6 +28,9 @@ export class MarketLinksController {
 
     @Inject(MarketLinkRepositoryType)
     private marketLinkRepository: typeof MarketLink,
+
+    @Inject(ScreenshotRepositoryType)
+    private screenshotRepository: typeof Screenshot,
   ) {}
 
   @Post()
@@ -55,6 +60,18 @@ export class MarketLinksController {
   async findOne(@Param('id') id: number) {
     return this.marketLinkRepository.findOne({
       where: { id },
+    });
+  }
+
+  @Get(':id/screenshots')
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: GetScreenshotDto,
+    isArray: true,
+  })
+  async getScreenshots(@Param('id') id: number) {
+    return await this.screenshotRepository.findAll({
+      where: { marketLinkId: id },
     });
   }
 
