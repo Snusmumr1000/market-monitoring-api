@@ -29,33 +29,51 @@
 ## Installation
 
 ```bash
-$ npm install
+$ yarn install
 ```
+
+## Database
+Some MySQL user with database permissions is required.
+
+## Env File
+`.env` file in the project root with such content should be created for the proper client application working:
+```
+# or any other params you need
+DB_USER=market_links_db_user
+DB_PASSWORD=pwd
+DB_NAME=market_links_db
+DB_URL=localhost
+DB_PORT=3306
+APP_PORT=8080
+```
+
+## Running the app for the first time
+If you are running this application for the first time, it is necessary to initialize the database firstly. Go to the `src/database/database.providers.ts` and add `{ force: true }` as an argument for the `sequelize.sync()` call. Then disable it, so the database won't be dropped and recreated again.
 
 ## Running the app
 
 ```bash
 # development
-$ npm run start
+$ yarn start
 
 # watch mode
-$ npm run start:dev
+$ yarn start:dev
 
 # production mode
-$ npm run start:prod
+$ yarn start:prod
 ```
 
 ## Test
 
 ```bash
 # unit tests
-$ npm run test
+$ yarn test
 
 # e2e tests
-$ npm run test:e2e
+$ yarn test:e2e
 
 # test coverage
-$ npm run test:cov
+$ yarn test:cov
 ```
 
 ## Support
