@@ -8,6 +8,7 @@ import {
   Param,
   Delete,
   Inject,
+  HttpStatus,
 } from '@nestjs/common';
 
 import { MarketLinksService } from './market-links.service';
@@ -16,6 +17,7 @@ import { GetMarketLinkDto } from './dto/get-market-link.dto';
 import { UpdateMarketLinkDto } from './dto/update-market-link.dto';
 import { MarketLink } from './entities/market-link.entity';
 import { MarketLinkRepositoryType } from './market-links.provider';
+import { ApiResponse } from '@nestjs/swagger';
 
 @Controller('market-links')
 export class MarketLinksController {
@@ -27,32 +29,52 @@ export class MarketLinksController {
   ) {}
 
   @Post()
-  create(@Body() createMarketLinkDto: CreateMarketLinkDto) {
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    type: GetMarketLinkDto,
+  })
+  async create(@Body() createMarketLinkDto: CreateMarketLinkDto) {
     return this.marketLinkRepository.create({
       ...createMarketLinkDto,
     });
   }
 
   @Get()
-  async findAll(): Promise<GetMarketLinkDto[]> {
-    return (await this.marketLinkRepository.findAll()) as GetMarketLinkDto[];
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: GetMarketLinkDto,
+    isArray: true,
+  })
+  async findAll() {
+    return this.marketLinkRepository.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: number): GetMarketLinkDto {
-    return {
-      id,
-      url: 'https://www.google.com' + this.marketLinksService.getHello(),
-    };
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: GetMarketLinkDto,
+  })
+  async findOne(@Param('id') id: number) {
+    return this.marketLinkRepository.findOne({
+      where: { id },
+    });
   }
 
-  @Put(':id')
-  update(@Body() updateMarketLinkDto: UpdateMarketLinkDto) {
-    return `This action updates a #${updateMarketLinkDto.id} cat`;
+  @Put()
+  @ApiResponse({
+    status: HttpStatus.OK,
+  })
+  async update(@Body() updateMarketLinkDto: UpdateMarketLinkDto) {
+    await this.marketLinkRepository.update(updateMarketLinkDto, {
+      where: { id: updateMarketLinkDto.id },
+    });
   }
 
   @Delete(':id')
-  remove(@Param('id') id: number) {
-    return `This action removes a #${id} cat`;
+  @ApiResponse({
+    status: HttpStatus.OK,
+  })
+  async remove(@Param('id') id: number) {
+    await this.marketLinkRepository.destroy({ where: { id } });
   }
 }
