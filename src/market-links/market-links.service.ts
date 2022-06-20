@@ -89,6 +89,7 @@ export class MarketLinksService {
   }
 
   private async initCronJobs() {
+    // TODO: move to CronService
     const cronJobs = await this.screenshotCronJobRepository.findAll();
     cronJobs.forEach((cronJob) => {
       this.appendScreenshotCronJob(cronJob);
@@ -96,6 +97,7 @@ export class MarketLinksService {
   }
 
   private async appendScreenshotCronJob(screenshotCronJob: ScreenshotCronJob) {
+    // TODO: move to CronService
     const job = new CronJob(screenshotCronJob.schedule, () => {
       this.takeScreenshotAndSave(screenshotCronJob.marketLinkId);
     });
@@ -106,10 +108,12 @@ export class MarketLinksService {
   }
 
   private removeScreenshotCronJob(screenshotCronJobId: number) {
+    // TODO: move to CronService
     this.schedulerRegistry.deleteCronJob(`${screenshotCronJobId}`);
   }
 
   private async takeScreenshotAndSave(marketLinkId: number) {
+    // TODO: move to AWS Lambda?
     const marketLink = await this.marketLinkRepository.findOne({
       where: { id: marketLinkId },
     });
@@ -124,6 +128,7 @@ export class MarketLinksService {
   }
 
   private static async takeScreenshotAsBase64(marketLinkUrl: string) {
+    // TODO: move to some utils or even to AWS Lambda?
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
     await page.setViewport({ width: 1366, height: 768 });
