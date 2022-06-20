@@ -52,7 +52,9 @@ APP_PORT=8080
 ```
 
 ## Running the app for the first time
-If you are running this application for the first time, it is necessary to initialize the database firstly. Go to the `src/database/database.providers.ts` and add `{ force: true }` as an argument for the `sequelize.sync()` call. Then disable it, so the database won't be dropped and recreated again.
+If you are running this application for the first time, it is necessary to initialize the database firstly. Go to the `src/database/database.providers.ts` and add `{ force: true }` as an argument for the `sequelize.sync()` call.
+Then remove the argument, so the database won't be dropped and recreated again.
+
 
 ## Running the app
 
@@ -79,6 +81,9 @@ $ yarn test:e2e
 # test coverage
 $ yarn test:cov
 ```
+
+## ERD Diagram
+![ERD Diagram](repo/erd.png "ERD Diagram")
 
 ## Support
 
