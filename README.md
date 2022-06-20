@@ -27,7 +27,7 @@
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
 ## Installation
-
+Node version: 18.x or higher.
 ```bash
 $ yarn
 ```
