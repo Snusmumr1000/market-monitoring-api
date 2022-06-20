@@ -90,6 +90,6 @@ export class MarketLinksController {
     status: HttpStatus.OK,
   })
   async remove(@Param('id') id: number) {
-    await this.marketLinkRepository.destroy({ where: { id } });
+    await this.marketLinksService.deleteMarketLink(id);
   }
 }

@@ -6,10 +6,11 @@ import {
   ForeignKey,
 } from 'sequelize-typescript';
 import { MarketLink } from '../../market-links/entities/market-link.entity';
+import { DataTypes } from 'sequelize';
 
 @Table
 export class Screenshot extends Model {
-  @Column
+  @Column(DataTypes.TEXT('long'))
   content: string;
 
   @ForeignKey(() => MarketLink)

@@ -8,6 +8,7 @@ import { Screenshot } from '../screenshots/entities/screenshot.entity';
 import { ScreenshotCronJob } from '../screenshot-cron-jobs/entities/screenshot-cron-job.entity';
 import { CronExpression, SchedulerRegistry } from '@nestjs/schedule';
 import { CronJob } from 'cron';
+import puppeteer from 'puppeteer';
 
 @Injectable()
 export class MarketLinksService {
@@ -20,14 +21,7 @@ export class MarketLinksService {
     private screenshotRepository: typeof Screenshot,
     private schedulerRegistry: SchedulerRegistry,
   ) {
-    this.__init();
-  }
-
-  async __init() {
-    const cronJobs = await this.screenshotCronJobRepository.findAll();
-    cronJobs.forEach((cronJob) => {
-      this.__appendScreenshotCronJob(cronJob);
-    });
+    this.initCronJobs();
   }
 
   async createMarketLink(
@@ -45,30 +39,76 @@ export class MarketLinksService {
     const screenshotCronJob = await this.screenshotCronJobRepository.create(
       cronJob,
     );
-    await this.__appendScreenshotCronJob(screenshotCronJob);
+    await this.appendScreenshotCronJob(screenshotCronJob);
+
+    await this.takeScreenshotAndSave(marketLink.id);
 
     return marketLink;
   }
 
-  async __appendScreenshotCronJob(screenshotCronJob: ScreenshotCronJob) {
-    const job = new CronJob(screenshotCronJob.schedule, () => {
-      this.__takeScreenshotAndSave(screenshotCronJob.marketLinkId);
+  async deleteMarketLink(marketLinkId: number) {
+    const marketLink = await this.marketLinkRepository.findOne({
+      where: { id: marketLinkId },
+      include: ScreenshotCronJob,
+    });
+    marketLink.screenshotCronJobs.forEach((screenshotCronJob) => {
+      this.removeScreenshotCronJob(screenshotCronJob.id);
     });
 
-    this.schedulerRegistry.addCronJob(
-      `TakeScreenshot for link ${screenshotCronJob.marketLinkId}`,
-      job,
-    );
+    await this.marketLinkRepository.destroy({
+      where: { id: marketLinkId },
+    });
+    await this.screenshotCronJobRepository.destroy({
+      where: { marketLinkId },
+    });
+  }
+
+  private async initCronJobs() {
+    const cronJobs = await this.screenshotCronJobRepository.findAll();
+    cronJobs.forEach((cronJob) => {
+      this.appendScreenshotCronJob(cronJob);
+    });
+  }
+
+  private async appendScreenshotCronJob(screenshotCronJob: ScreenshotCronJob) {
+    const job = new CronJob(screenshotCronJob.schedule, () => {
+      this.takeScreenshotAndSave(screenshotCronJob.marketLinkId);
+    });
+
+    this.schedulerRegistry.addCronJob(`${screenshotCronJob.id}`, job);
 
     job.start();
   }
 
-  async __takeScreenshotAndSave(marketLinkId: number) {
+  private async removeScreenshotCronJob(screenshotCronJobId: number) {
+    this.schedulerRegistry.deleteCronJob(`${screenshotCronJobId}`);
+  }
+
+  private async takeScreenshotAndSave(marketLinkId: number) {
+    const marketLink = await this.marketLinkRepository.findOne({
+      where: { id: marketLinkId },
+    });
+    const screenshotBase64 = await MarketLinksService.takeScreenshotAsBase64(
+      marketLink.url,
+    );
     const screenshot = {
       marketLinkId,
-      content:
-        'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAIAQMAAAD+wSzIAAAABlBMVEX///+/v7+jQ3Y5AAAADklEQVQI12P4AIX8EAgALgAD/aNpbtEAAAAASUVORK5CYII',
+      content: screenshotBase64,
     };
     await this.screenshotRepository.create(screenshot);
+  }
+
+  private static async takeScreenshotAsBase64(marketLinkUrl: string) {
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.setViewport({ width: 1366, height: 768 });
+    await page.goto(marketLinkUrl);
+    const screenshotBase64 = await page
+      .screenshot({ encoding: 'base64' })
+      .then((data) => {
+        return `data:image/png;base64,${data}`;
+      });
+    await browser.close();
+    return screenshotBase64;
   }
 }

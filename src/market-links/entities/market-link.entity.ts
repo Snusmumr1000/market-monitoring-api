@@ -10,6 +10,6 @@ export class MarketLink extends Model {
   @HasMany(() => Screenshot)
   screenshots: Screenshot[];
 
-  @HasMany(() => ScreenshotCronJob, { onDelete: 'cascade' })
+  @HasMany(() => ScreenshotCronJob)
   screenshotCronJobs: ScreenshotCronJob[];
 }
