@@ -34,7 +34,11 @@ $ yarn
 
 ## Database
 Some MySQL user with database permissions is required.
-
+In mysql console:
+```bash
+CREATE USER 'market_links_db_user'@'localhost' IDENTIFIED BY 'pwd';
+GRANT ALL PRIVILEGES ON market_links_db.* TO 'market_links_db_user'@'localhost';
+```
 ## Env File
 `.env` file in the project root with such content should be created for the proper client application working:
 ```
